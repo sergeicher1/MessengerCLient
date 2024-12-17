@@ -107,6 +107,25 @@
         background-color: #aaa;
         cursor: not-allowed;
       }
+      .spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid #ddd;
+        border-top: 3px solid #4caf50;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
     </style>
   </head>
   <body>
@@ -121,14 +140,17 @@
     </div>
 
     <div id="chat-container" style="display: none">
-      <div id="chat-header">WebSocket Chat Live</div>
+      <div id="chat-header">WebSocket Live Chat</div>
       <div id="messages"></div>
       <div id="input-container">
         <textarea
           id="message-input"
           placeholder="Type your message..."
         ></textarea>
-        <button id="send-button" disabled>Send</button>
+        <button id="send-button" disabled>
+          <span id="send-text">Send</span>
+          <div id="spinner" class="spinner" style="display: none"></div>
+        </button>
       </div>
       <div id="controls">
         <button id="clear-button">Clear Chat</button>
@@ -145,9 +167,9 @@
       const logoutButton = document.getElementById("logout-button");
       // PROD:
       // WebSocket server URL
-      const serverAddress = "wss://messenger-vywa.onrender.com";
+        const serverAddress = "wss://messenger-vywa.onrender.com";
       // LOCAL TESTING:
-      //    const serverAddress = "ws://127.0.0.1:6001";
+      // const serverAddress = "ws://127.0.0.1:6001";
       let nickname = "";
 
       // Select elements
@@ -155,11 +177,17 @@
       const messageInput = document.getElementById("message-input");
       const sendButton = document.getElementById("send-button");
 
+      // Select the spinner and send text elements
+      const spinner = document.getElementById("spinner");
+      const sendText = document.getElementById("send-text");
+
       // Create WebSocket connection
       const client = new WebSocket(serverAddress);
 
       client.onopen = () => {
         sendButton.disabled = false;
+        spinner.style.display = "none"; // Hide the spinner
+        sendText.style.display = "inline"; // Show the "Send" text
       };
 
       client.onmessage = (event) => {
@@ -179,10 +207,14 @@
 
       client.onclose = () => {
         sendButton.disabled = true;
+        spinner.style.display = "inline-block"; // Show the spinner
+        sendText.style.display = "none"; // Hide the "Send" text
       };
 
       client.onerror = (error) => {
         console.error("WebSocket Error:", error);
+        spinner.style.display = "inline-block"; // Show the spinner
+        sendText.style.display = "none"; // Hide the "Send" text
       };
 
       // Handle nickname submission
